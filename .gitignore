@@ -1,4 +1,6 @@
 venv
 venv/*
 
-config.py
+*.swn
+*.swo
+*.swp
