@@ -1,0 +1,53 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+
+\title{Projeto: Gov Sananga - Mapeamento e Análise de Empresas na Cidade Estrutural com Machine Learning e OSINT}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Objetivo}
+
+Criar uma ferramenta chamada \textbf{Gov Sananga} para mapear e analisar empresas formais e informais na Cidade Estrutural, utilizando técnicas de Machine Learning, scraping e OSINT.
+
+\section*{Nome e Simbolismo}
+
+\begin{itemize}
+    \item \textbf{Gov}: Refere-se ao apoio governamental na coleta e análise de dados.
+    \item \textbf{Sananga}: Um colírio indígena que simboliza clareza e visão, representando a capacidade da ferramenta de revelar informações cruciais sobre a economia informal.
+\end{itemize}
+
+\section*{Arquitetura e Tecnologias}
+
+\begin{itemize}
+    \item \textbf{Kubernetes (K8s)}: A ferramenta usará K8s para orquestrar containers, garantindo escalabilidade e resiliência da aplicação. K8s gerenciará a implantação automatizada e eficiente de modelos e serviços.
+    \item \textbf{GPT para Leitura de Imagens}: GPT será utilizado para analisar e interpretar as imagens capturadas pelo Google Street View, identificando e categorizando visualmente estabelecimentos comerciais.
+    \item \textbf{Google API para Scraping}: Utilizaremos a Google Custom Search API e Google Maps API para coletar dados estruturados sobre empresas, complementando a análise das imagens. Essa abordagem permitirá a coleta de informações detalhadas diretamente de fontes confiáveis.
+    \item \textbf{Terraform}: Terraform será empregado para definir e provisionar a infraestrutura necessária em nuvem, facilitando a automação da criação de ambientes, como clusters K8s e serviços de armazenamento.
+\end{itemize}
+
+\section*{Estudo de Caso na Cidade Estrutural}
+
+\begin{itemize}
+    \item \textbf{Coleta de Dados}: Extração de informações de empresas através do Google Maps e Google Street View, combinada com o uso de GPT para análise de imagens e Google API para scraping de dados estruturados.
+    \item \textbf{Análise Comparativa}: Comparação dos dados coletados com registros oficiais, para avaliar o impacto econômico e social das empresas informais.
+\end{itemize}
+
+\section*{Resultados Esperados}
+
+\begin{itemize}
+    \item \textbf{Mapeamento Detalhado}: Criação de uma base de dados abrangente, incluindo empresas formais e informais.
+    \item \textbf{Ferramenta Escalável}: Infraestrutura robusta e escalável utilizando K8s, Terraform e Google API, aplicável a outras regiões.
+    \item \textbf{Insights Econômicos}: Geração de dados e análises que auxiliem na formulação de políticas públicas.
+\end{itemize}
+
+\section*{Conclusão}
+
+O Gov Sananga busca trazer clareza à economia informal da Cidade Estrutural, utilizando tecnologias avançadas como K8s, GPT, Google API e Terraform para criar uma solução escalável, automatizada e eficiente.
+
+\end{document}
+

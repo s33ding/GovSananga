@@ -1,0 +1,127 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+
+
+\title{Projeto: Gov Sananga - Mapeamento e Análise de Empresas na Cidade Estrutural com Machine Learning e OSINT}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Introdução}
+
+Nos últimos anos, o mercado de trabalho informal tem crescido de forma significativa, principalmente em áreas urbanas de baixa renda e periferias. Segundo dados da Organização Internacional do Trabalho (OIT), a informalidade responde por uma parte substancial das atividades econômicas em países em desenvolvimento, gerando empregos, porém sem garantias de proteção social, regulamentação ou direitos trabalhistas formais. Na realidade brasileira, isso é especialmente evidente em áreas como a Cidade Estrutural, onde a informalidade permeia desde pequenos comerciantes até prestadores de serviços autônomos.
+
+A identificação e o mapeamento de empresas formais e informais em regiões como a Cidade Estrutural são essenciais para entender o impacto econômico e social da informalidade. A falta de dados estruturados sobre essas atividades econômicas dificulta a formulação de políticas públicas e ações governamentais que possam apoiar a formalização e o crescimento dessas empresas. Nesse contexto, tecnologias como machine learning, scraping de dados e OSINT (Open Source Intelligence) podem desempenhar um papel fundamental na coleta e análise de informações, contribuindo para uma melhor compreensão da economia local.
+
+O projeto "Gov Sananga" tem como objetivo mapear e analisar empresas formais e informais na Cidade Estrutural, utilizando técnicas avançadas de machine learning, ferramentas de scraping e dados abertos. Através dessas tecnologias, pretende-se criar uma base de dados detalhada e robusta, que permita a visualização e análise dessas atividades econômicas, contribuindo para o desenvolvimento de políticas públicas mais assertivas.
+
+\section*{Referencial Teórico}
+
+\subsection*{2.1 Machine Learning e Análise de Imagens em Cenários Reais}
+
+O uso de \textit{machine learning} para análise de dados visuais e espaciais tem sido amplamente aplicado em diversos setores, proporcionando insights valiosos sobre dinâmicas sociais, ambientais e econômicas.
+
+Wang et al. (2022) realizaram um estudo que explora como imagens do \textit{Google Street View} (GSV), em conjunto com técnicas de \textit{machine learning}, podem ser utilizadas para prever variações de preços de imóveis. Esse estudo destaca a aplicação prática da \textit{visão computacional} e da \textit{análise de imagens urbanas} para captar informações sobre a qualidade do ambiente urbano, infraestrutura e o perfil socioeconômico das áreas. Em cenários reais, essa abordagem permite monitorar o desenvolvimento urbano e tomar decisões baseadas em dados precisos, como na gestão de políticas públicas de habitação e desenvolvimento urbano. Além disso, a aplicação de \textit{machine learning} a dados visuais oferece uma maneira eficiente de interpretar variáveis que afetam o valor dos imóveis, como a presença de áreas verdes, qualidade das estradas e proximidade a serviços essenciais.
+
+Outro exemplo relevante é o estudo de Cai et al. (2022), que explorou o uso de \textit{deep learning} e imagens do \textit{Google Street View} para analisar o impacto do ambiente visual dos motoristas em acidentes de trânsito. Nesse caso, a técnica de \textit{segmentação de imagens} foi utilizada para identificar e quantificar elementos como árvores, edifícios e rodovias, que foram posteriormente correlacionados com a segurança no trânsito. A pesquisa revelou que a presença de árvores e a complexidade visual do ambiente podem influenciar diretamente o comportamento dos motoristas e a frequência de acidentes. Esse tipo de aplicação de \textit{machine learning} para análise de segurança viária é um exemplo claro de como a tecnologia pode ser usada em cenários de planejamento urbano e gerenciamento de transporte, oferecendo informações detalhadas sobre os fatores que afetam a segurança nas estradas.
+
+\subsection*{2.2 Tecnologias para Análise de Mercados e Ambientes Urbanos}
+
+A análise de dados visuais, como as imagens capturadas por serviços como o \textit{Google Street View}, tem sido integrada a técnicas avançadas de \textit{machine learning} para estudar os ambientes urbanos e sua relação com diferentes setores econômicos. Wang et al. (2022) demonstram que o uso dessas tecnologias pode auxiliar na análise do mercado imobiliário ao fornecer uma avaliação mais precisa da infraestrutura e qualidade do ambiente. Essa análise tem grande relevância em cenários reais, como na avaliação de políticas de zoneamento, melhorias em infraestrutura urbana e precificação de terrenos e imóveis.
+
+De maneira semelhante, Cai et al. (2022) aplicaram técnicas de \textit{machine learning}, como a \textit{detecção de objetos}, para medir o impacto do ambiente urbano na segurança do trânsito. Os resultados indicam que o planejamento de cidades pode ser aprimorado a partir da análise de dados visuais que identificam elementos no ambiente que influenciam o comportamento dos motoristas. As soluções propostas a partir de estudos como esse podem ser aplicadas para orientar planejadores urbanos na criação de infraestruturas mais seguras, ao utilizar \textit{insights} gerados por essas análises de dados visuais.
+
+\subsection*{2.3 Impacto das Tecnologias no Planejamento Urbano e Segurança}
+
+Esses exemplos evidenciam o potencial das tecnologias de \textit{visão computacional} e \textit{machine learning} em setores reais, como o planejamento urbano e a segurança no trânsito. O uso de algoritmos de \textit{deep learning} para processar e interpretar dados visuais capturados em cidades oferece uma oportunidade de melhorar significativamente a gestão de políticas públicas, principalmente em áreas relacionadas à habitação, transporte e segurança. Além disso, a automação dessas análises reduz custos e melhora a eficiência na coleta e análise de dados, facilitando a tomada de decisões baseada em evidências.
+
+Em suma, o uso de tecnologias como \textit{machine learning}, \textit{visão computacional} e análise de dados visuais está se consolidando como uma ferramenta poderosa para transformar cenários reais, proporcionando soluções baseadas em dados que contribuem para o desenvolvimento de cidades inteligentes e mais seguras.
+
+
+\subsection*{2.4 Informalidade no Mercado de Trabalho e nas Empresas em Comunidades de Baixa Renda}
+
+#### 1. Baseado no Artigo: Badaoui et al. (2023)
+
+O artigo de **Badaoui et al. (2023)** explora a relação entre a **informalidade**, o **autoemprego** e as habilidades gerenciais heterogêneas em países em desenvolvimento. Eles sugerem que muitos indivíduos optam pelo autoemprego informal devido à falta de habilidades gerenciais adequadas para competir no setor formal. A decisão de manter negócios na informalidade não é apenas uma questão de sobrevivência, mas também uma escolha baseada em limitações de capital humano e de acesso ao mercado.
+
+\paragraph{Autoemprego e Habilidades Gerenciais}
+A informalidade no setor de autoemprego está associada a indivíduos com habilidades gerenciais limitadas, que preferem evitar os custos fixos da formalidade. Empresas informais tendem a ser menos produtivas e mais voláteis, mas oferecem maior flexibilidade aos trabalhadores que não possuem a competência necessária para competir em ambientes altamente regulados. A baixa exigência de formalização e a flexibilidade do autoemprego são atrativos para trabalhadores em comunidades de baixa renda, onde a educação formal é mais escassa e as oportunidades de emprego formal são reduzidas.
+
+\paragraph{Decisão de Permanecer na Informalidade}
+Muitas micro e pequenas empresas optam por permanecer informais devido aos custos e à burocracia envolvidos na formalização. No entanto, **Badaoui et al. (2023)** destacam que essas empresas acabam presas em um ciclo de baixa produtividade, pois a falta de acesso ao crédito formal e a programas governamentais impede o crescimento sustentável. A falta de apoio institucional e de infraestrutura também força muitos empreendedores informais a permanecerem à margem da economia formal.
+
+\paragraph{Impacto da Informalidade nas Comunidades de Baixa Renda}
+Nas comunidades de baixa renda, a informalidade do mercado de trabalho é ainda mais prevalente devido às dificuldades de acesso a educação de qualidade e oportunidades formais de emprego. **Badaoui et al. (2023)** argumentam que a informalidade, nesses contextos, se torna uma saída natural para aqueles com pouca qualificação ou acesso a capital. Contudo, isso perpetua a desigualdade e limita o crescimento econômico, uma vez que essas empresas e trabalhadores não têm acesso a mecanismos que impulsionam a competitividade no mercado formal.
+
+#### 2. Baseado no Artigo: Bosch e Esteban-Pretel (2012)
+
+O estudo de **Bosch e Esteban-Pretel (2012)** foca na **criação e destruição de empregos** no contexto de mercados informais, com ênfase nas transições entre os setores formal e informal em economias em desenvolvimento. Eles analisam como a volatilidade do emprego afeta trabalhadores e empresas no setor informal, destacando as barreiras para a formalização.
+
+\paragraph{Criação e Destruição de Empregos no Setor Informal}
+O mercado de trabalho informal apresenta taxas de rotatividade significativamente mais altas do que o setor formal. **Bosch e Esteban-Pretel (2012)** destacam que a taxa de separação de empregos informais é três vezes maior do que a do setor formal. A instabilidade no emprego é uma característica central do setor informal, especialmente em comunidades de baixa renda, onde a vulnerabilidade econômica é maior.
+
+\paragraph{Impacto Cíclico da Informalidade}
+Os autores observam que, durante períodos de expansão econômica, muitos trabalhadores transitam do setor informal para o formal. No entanto, em tempos de crise, o setor informal atua como um "amortecedor", absorvendo trabalhadores desempregados que não conseguem vagas no mercado formal. Essa dinâmica evidencia o papel da informalidade como um regulador informal do mercado de trabalho, mas também revela a instabilidade e a precariedade associadas a esses empregos.
+
+\paragraph{Implicações para Políticas Públicas}
+**Bosch e Esteban-Pretel (2012)** sugerem que políticas públicas voltadas para a redução dos custos da formalidade podem aumentar a transição de trabalhadores para o setor formal. Entretanto, é necessário cautela, pois o aumento da formalização pode, paradoxalmente, aumentar a desigualdade salarial, uma vez que o setor informal tende a absorver os trabalhadores menos qualificados e com menores salários. Políticas que busquem integrar essas populações ao mercado formal precisam considerar tanto a capacitação da mão de obra quanto a criação de um ambiente regulatório mais flexível para pequenas empresas.
+\end{itemize}
+
+\section*{Referências}
+
+
+\begin{itemize}
+    \item \textbf{Coleta de Dados}: A coleta de dados será realizada através de duas abordagens principais. Primeiramente, imagens do Google Street View serão analisadas utilizando GPT para identificar estabelecimentos comerciais. Em paralelo, dados estruturados sobre essas empresas serão coletados por meio das APIs do Google, garantindo uma visão abrangente da atividade comercial local.
+    
+    \item \textbf{Análise Comparativa}: Os dados coletados serão comparados com registros oficiais de empresas, quando disponíveis, a fim de avaliar o impacto econômico e social das empresas informais. Essa análise permitirá entender o grau de informalidade e o papel dessas empresas na economia local.
+\end{itemize}
+
+\section*{Resultados Esperados}
+
+Com base nas metodologias e tecnologias empregadas, espera-se atingir os seguintes resultados:
+
+\begin{itemize}
+    \item \textbf{Mapeamento Detalhado}: Criação de uma base de dados robusta, que inclua tanto empresas formais quanto informais presentes na Cidade Estrutural. O mapeamento permitirá uma análise mais precisa da atividade econômica da região.
+    
+    \item \textbf{Ferramenta Escalável}: A implementação de uma infraestrutura baseada em K8s, Terraform e APIs do Google proporcionará uma ferramenta escalável que poderá ser replicada em outras regiões que apresentem desafios semelhantes no mapeamento da economia informal.
+    
+    \item \textbf{Insights Econômicos}: A análise dos dados coletados fornecerá insights importantes para a formulação de políticas públicas que busquem formalizar e apoiar empresas informais, contribuindo para o desenvolvimento econômico e social dessas regiões.
+\end{itemize}
+
+
+\section*{Estudo de Caso na Cidade Estrutural}
+
+\begin{itemize}
+    \item \textbf{Coleta de Dados}: Extração de informações de empresas através do Google Maps e Google Street View, combinada com o uso de GPT para análise de imagens e Google API para scraping de dados estruturados.
+    
+    \item \textbf{Análise Comparativa}: Comparação dos dados coletados com registros oficiais, para avaliar o impacto econômico e social das empresas informais.
+\end{itemize}
+
+\section*{Resultados Esperados}
+
+\begin{itemize}
+    \item \textbf{Mapeamento Detalhado}: Criação de uma base de dados abrangente, incluindo empresas formais e informais.
+    
+    \item \textbf{Ferramenta Escalável}: Infraestrutura robusta e escalável utilizando K8s, Terraform e Google API, aplicável a outras regiões.
+    
+    \item \textbf{Insights Econômicos}: Geração de dados e análises que auxiliem na formulação de políticas públicas.
+\end{itemize}
+
+\section*{Conclusão}
+
+O \textbf{Gov Sananga} busca trazer clareza à economia informal da Cidade Estrutural, utilizando tecnologias avançadas como K8s, GPT, Google API e Terraform para criar uma solução escalável, automatizada e eficiente.
+
+\section*{Referências}
+
+\begin{itemize}
+   \item Wang, L., Wu, X., \& Fan, Y. (2022). The effect of environment on housing prices: Evidence from the Google Street View. \textit{Journal of Forecasting}, 41(4), 1-18.
+    \item Cai, Q., Abdel-Aty, M., Zheng, O., \& Wu, Y. (2022). Applying machine learning and Google Street View to explore effects of drivers’ visual environment on traffic safety. \textit{Transportation Research Part C}, 135, 103541.
+    \item Bosch, M., & Esteban-Pretel, J. (2012). Job creation and job destruction in the presence of informal markets. \textit{Journal of Development Economics}, 98, 270–286.
+    \item Badaoui, E., Strobl, E., & Walsh, F. (2023). Informality, self-employment, and heterogeneous managerial ability: A model for developing countries. \textit{Journal of International Development}.
+
+\end{document}
+
