@@ -1,6 +1,5 @@
 venv
 venv/*
-
 *.swn
 *.swo
 *.swp
