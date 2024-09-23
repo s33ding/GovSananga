@@ -23,3 +23,9 @@ df = osmnx_func.extract_coordinates(gdf)
 df["group"] = df["start_node"].astype(str) + "-" + df["end_node"].astype(str)
 
 df = etl_func.assign_order_and_total(df)
+
+gr_ex = df.sort_values(by=["total_coordinates","order"], ascending=False).iloc[0]["group"]
+
+ex = df.loc[df.group == gr_ex]
+
+
