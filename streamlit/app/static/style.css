@@ -1,0 +1,50 @@
+/* Reset some default styles */
+body, h1, p {
+    margin: 0;
+    padding: 0;
+}
+
+/* Set a background color for the body */
+body {
+    background-color: #fff; /* White background */
+    color: #333; /* Dark text color */
+    font-family: Arial, sans-serif;
+}
+
+/* Style the header */
+header {
+    background-color: #f1f1f1; /* Light header background */
+    color: #333; /* Dark text color */
+    padding: 20px;
+    text-align: center;
+}
+
+/* Style the navigation menu */
+nav {
+    background-color: #ddd; /* Light gray background */
+    text-align: center; /* Center align the navigation menu */
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+nav li {
+    display: inline;
+    margin-right: 10px;
+}
+
+nav a {
+    text-decoration: none;
+    color: #333; /* Dark text for the links */
+}
+
+/* Style the footer */
+footer {
+    background-color: #f1f1f1; /* Light footer background */
+    color: #333; /* Dark text color */
+    text-align: center;
+    padding: 10px;
+}
+

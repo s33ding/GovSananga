@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <br>
+    <title>GovSananga</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+<body>
+    <br>
+    <h1>GovSananga</h1>
+    <p3><b>e.g.:</b></p3>
+    <br>
+    <p1>Cidade Estrutural, Distrito Federal, Brazil</p1>
+    <br>
+    <br>
+    <br>
+    <form method="POST">
+        <label for="city">city:</label>
+        <input type="text" id="city" name="city"><br><br>
+        <input type="submit" value="Submit">
+    </form>
+    <br>
+    <!-- Display the image if available -->
+    {% if image_path %}
+        <h2>Your Image:</h2>
+        <img src="{{ image_path }}" alt="Processed Image" style="max-width: 100%; height: auto;">
+    {% endif %}
+    <br>
+    <ul>
+        <li>
+                <a href="/">Github Repository</a>
+        </li>
+    </ul>
+
+</body>
+</html>
+

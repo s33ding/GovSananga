@@ -1,7 +1,29 @@
 import osmnx as ox
 import pandas as pd
-import geopandas as gpd
+import matplotlib.pyplot as plt
+import contextily as ctx
 
+def plot_realistic_road_network(gdf, place_name, output_image="realistic_road_network_map.png"):
+    """
+    Plot the road network on a map with realistic context and save the image.
+
+    Parameters:
+    gdf (GeoDataFrame): The GeoDataFrame containing road network edges.
+    place_name (str): The name of the place to display as the map title.
+    output_image (str): The file path where the image will be saved.
+    """
+    fig, ax = plt.subplots(figsize=(10, 10))
+    ax.set_title(f"Road Network in {place_name}", fontsize=15)
+
+    # Plot the road network
+    gdf.plot(ax=ax, linewidth=0.7, color="blue", alpha=0.7)
+
+    ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
+
+
+    # Save the plot as an image file
+    plt.savefig(output_image, bbox_inches="tight", dpi=300)
+    plt.close()
 
 def get_road_network(place_name, output_file="roads.geojson"):
     """
@@ -16,15 +38,14 @@ def get_road_network(place_name, output_file="roads.geojson"):
     
     # Get road edges (links between intersections)
     gdf = ox.graph_to_gdfs(G, nodes=False, edges=True)
+    plot_realistic_road_network(gdf, place_name, "output/road_network_map.png")
+
     
     return gdf
 
 def save_road_network(gdf, output_file="roads.geojson"):
     # Save to a GeoJSON or shapefile
     gdf.to_file(output_file, driver="GeoJSON")
-
-def load_road_network(file_name="roads.geojson"):
-    return gpd.read_file(file_name)
 
 def extract_coordinates(gdf):
     # List to hold the data

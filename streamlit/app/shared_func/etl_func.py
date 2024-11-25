@@ -24,6 +24,18 @@ def assign_total(df):
         df.loc[df['group'] == group, 'total_coordinates'] = len(df[df["group"] == group])
     return df
 
+# Function to calculate the Haversine distance between two points
+def calculate_distance(coord1, coord2):
+    lat1, lon1 = coord1
+    lat2, lon2 = coord2
+    radius = 6371  # Earth radius in kilometers
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance = radius * c
+    return distance
+
 def assign_previous_coordinates(df):
     """
     Assigns previous coordinates within each unique group in the DataFrame based on the next_coordinates.
@@ -93,99 +105,6 @@ def assign_next_coordinates(df):
 
     return df
 
-# Function to calculate the heading between two coordinates
-def calculate_heading(coord1, coord2):
-    lat1, lon1 = map(math.radians, coord1)
-    lat2, lon2 = map(math.radians, coord2)
-
-    dlon = lon2 - lon1
-
-    x = math.sin(dlon) * math.cos(lat2)
-    y = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dlon)
-
-    initial_heading = math.atan2(x, y)
-
-    # Convert from radians to degrees and normalize to 0-360
-    heading = math.degrees(initial_heading)
-    heading = (heading + 360) % 360
-
-    return heading
-
-# Function to calculate the Haversine distance between two points
-def calculate_distance(coord1, coord2):
-    lat1, lon1 = coord1
-    lat2, lon2 = coord2
-    radius = 6371  # Earth radius in kilometers
-    dlat = math.radians(lat2 - lat1)
-    dlon = math.radians(lon2 - lon1)
-    a = math.sin(dlat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2) ** 2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    distance = radius * c
-    return distance
-
-def weighted_moving_average_heading(df, window=5):
-    """
-    Smooth the heading values in the DataFrame using a weighted moving average.
-
-    Parameters:
-    df (pd.DataFrame): Input DataFrame with 'heading' column.
-    window (int): Size of the moving window to calculate the weighted average.
-
-    Returns:
-    pd.DataFrame: DataFrame with smoothed 'heading' values.
-    """
-    # Check if the 'heading' column exists
-    if 'heading' not in df.columns:
-        raise ValueError("The DataFrame must contain a 'heading' column.")
-
-    # Convert heading to radians for circular smoothing
-    df['heading_rad'] = df['heading'].apply(lambda x: math.radians(x))
-
-    # Calculate the weighted moving average for both sin and cos components
-    weights = list(range(1, window + 1))
-    weight_sum = sum(weights)
-
-    def weighted_average(series):
-        return (series * weights[-len(series):]).sum() / weight_sum
-
-    df['sin_heading'] = df['heading_rad'].apply(math.sin).rolling(window=window, min_periods=1).apply(weighted_average, raw=True)
-    df['cos_heading'] = df['heading_rad'].apply(math.cos).rolling(window=window, min_periods=1).apply(weighted_average, raw=True)
-
-    # Calculate the smoothed heading by converting back to degrees
-    df['heading'] = df.apply(lambda row: math.degrees(math.atan2(row['sin_heading'], row['cos_heading'])), axis=1)
-
-    # Ensure all headings are between 0 and 360 degrees
-    df['heading'] = df['heading'].apply(lambda x: (x + 360) % 360)
-
-    # Drop temporary columns used for smoothing
-    df.drop(columns=['heading_rad', 'sin_heading', 'cos_heading'], inplace=True)
-
-    return df
-
-# Function to add heading column to DataFrame
-def add_heading_column(df):
-    for i in range(len(df) - 1):
-        coord1 = df['coordinates'].iloc[i]
-        coord2 = df['next_coordinates'].iloc[i]
-        if pd.isna(coord2):
-            pass
-        else:
-            heading = calculate_heading(coord1, coord2)
-            df['heading'].iloc[i] = heading
-    df = df.ffill()
-    df = weighted_moving_average_heading(df, window=3)
-    return df
-
-# Function to order coordinates and return a DataFrame with the new "order" column
-def calculate_heading_in_all_groups(df):
-    unique_groups = df['group'].unique()
-    df["heading"] = None
-    for group in unique_groups:
-        group_df = df[df['group'] == group].copy()  # Get all rows with the same group
-        group_df = add_heading_column(group_df)
-        df = df.loc[df["group"] != group]
-        df = pd.concat([df, group_df])
-    return df
 
 # Function to order coordinates and return a DataFrame with the new "order" column
 def add_order_column_in_all_groups(df):

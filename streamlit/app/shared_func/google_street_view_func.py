@@ -1,12 +1,15 @@
+import config
 import googlemaps
 import time
 import os
 import requests
 from shared_func.secret_manager_func import get_secret
+from shared_func.lambda_func import invoke_lambda
 import shutil
 import math
 from PIL import Image
 from io import BytesIO
+import boto3
 
 
 # Fetch the API key once and reuse it
@@ -24,11 +27,8 @@ def create_clean_folder(folder_name):
     # Create the folder again, now empty
     os.makedirs(folder_name, exist_ok=True)
     
-import requests
-from PIL import Image
-from io import BytesIO
 
-def get_street_view_image(location, heading, pitch=0, fov=90, output_image="street_view_image.jpg"):
+def get_street_view_image(group_name, location, heading, pitch=0, fov=config.gsv_fov, order=None,delete=True,verbose=False):
     global response
     """
     Fetches a Google Street View image for the given location and heading, and saves it if valid.
@@ -44,6 +44,9 @@ def get_street_view_image(location, heading, pitch=0, fov=90, output_image="stre
     - None
     """
     # Prepare the parameters for the API request
+
+    folder_name = f"output/street-view/group-{group_name}"                           
+    output_image = f"{folder_name}/order-{order}-heading-{heading}.jpg"
     base_url = "https://maps.googleapis.com/maps/api/streetview"
     params = {
         "size": "2048x2048",  # Image size
@@ -56,7 +59,6 @@ def get_street_view_image(location, heading, pitch=0, fov=90, output_image="stre
 
     # Print URL for manual testing in the browser
     request_url = requests.Request('GET', base_url, params=params).prepare().url
-    print(f"Request URL: {request_url}")
 
     # Send the request to fetch the Street View image
     response = requests.get(base_url, params=params)
@@ -69,13 +71,20 @@ def get_street_view_image(location, heading, pitch=0, fov=90, output_image="stre
         if image.getbbox() and is_image_valid(image):
             with open(output_image, "wb") as file:
                 file.write(response.content)
-            print(f"Street View image saved as {output_image}")
-            return True
+            if verbose:
+                print(f"Street View image saved as {output_image}")
+            if delete:
+                os.system(f"rm {output_image}")
+            return request_url 
         else:
-            print("No valid Street View imagery available for this location.")
+            if verbose:
+                print("No valid Street View imagery available for this location.")
+            return False
     else:
-        print(f"Failed to fetch a valid image. HTTP Status Code: {response.status_code}")
-        print(f"Response: {response.text if response.content else 'No content returned'}")
+        if verbose:
+            print(f"Failed to fetch a valid image. HTTP Status Code: {response.status_code}")
+            print(f"Response: {response.text if response.content else 'No content returned'}")
+        return False
 
 def is_image_valid(image):
     """
@@ -120,26 +129,52 @@ def is_uniform_image(image, threshold=15):
     # If standard deviation is below the threshold, the image is uniform
     return stddev < threshold
 
-def automate_street_view_images(df, group_name):
-    # Filter the DataFrame based on the group
+def upload_to_s3(file_path, bucket_name, key_name):
+    # Initialize the S3 client
+    s3_client = boto3.client("s3")
+    s3_path = f"s3://{bucket_name}/{key_name}"
+    s3_client.upload_file(file_path, bucket_name, key_name)
+    print(f"Uploaded {file_path} to {s3_path}")
+
+def automate_street_view_images(df, group_name,verbose=False):                                     
+    # Filter DataFrame based on the specified group name and reset index
     filtered_df = df[df["group"] == group_name].reset_index(drop=True)
-
-    # Create the output directory if it doesn't exist
-    folder_name = f"output/street-view-gr-{group_name}"
+    
+    # Define output directory and ensure it's clean
+    folder_name = f"output/street-view/group-{group_name}"                           
     create_clean_folder(folder_name)
-    print(f"Output directory created: {folder_name}")
 
-    # Iterate through the DataFrame and call the get_street_view_image function for each pair of coordinates
-    for i,val in filtered_df.iterrows():
-        location = filtered_df["coordinates"].iloc[i]
-        next_location = filtered_df["next_coordinates"].iloc[i]
-        order = filtered_df["order"].iloc[i]
-        # Generate the image with the calculated heading
-        if next_location is not None:
-            get_street_view_image(location=location, heading=0, output_image=f"{folder_name}/{order}-a-0.jpg")
-            get_street_view_image(location=location, heading=90, output_image=f"{folder_name}/{order}-b-90.jpg")
-            get_street_view_image(location=location, heading=180, output_image=f"{folder_name}/{order}-c-180.jpg")
-            get_street_view_image(location=location, heading=270, output_image=f"{folder_name}/{order}-d-270.jpg")
+    if verbose:
+        print(f"Output directory created: {folder_name}")
+
+    # Initialize s3_path column
+    filtered_df["s3_path"] = None
+
+    # Iterate over each row in the filtered DataFrame
+    for i, row in filtered_df.iterrows():
+        location = row["coordinates"]
+        order = int(row["order"])
+        # If coordinates are provided, generate images at 4 headings
+        if location is not None:
+            lst_valid_url = [] 
+            for heading in [0, 90, 180, 270]:
+                request_url = get_street_view_image(group_name=group_name, location=location, heading=heading, order=order)
+                if request_url:  
+                    filtered_df.at[i, f"request_url_heading_{heading}"] = request_url # url from the GSV
+                    my_payload = {
+                                "url":request_url,
+                                "location": f"({location[0]},{location[1]})",  
+                                "heading":heading,
+                                "order":order,
+                                "group":group_name
+                            }
+
+                    print(my_payload)
+                    
+                    invoke_lambda(
+                            my_payload=my_payload, 
+                            lambda_name=config.lambda_1_label_img, 
+                            invocation_type="Event"
+                            )
+
     return filtered_df
-
-
