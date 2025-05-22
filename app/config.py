@@ -1,7 +1,7 @@
 city="Cidade Estrutural, Distrito Federal, Brazil"
 api_key="teste"
 gdf_file_name="output/roads.geojson"
-bucket_name = "s33ding-govsananga"
+bucket_name = "myapp-govsananga"
 dynamo_tbl_1 = "govSananga-main"
 dynamo_tbl_2 = "govSananga-img-analysis"
 region = "us-east-1"

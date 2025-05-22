@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Infrastructure for govSananga - DynamoDB and S3 Bucket
+
+Parameters:
+  BucketName:
+    Type: String
+    Default: myapp-govsananga
+    Description: S3 Bucket name for govSananga
+
+  DynamoTbl1:
+    Type: String
+    Default: govSananga-main
+    Description: Main DynamoDB table
+
+  DynamoTbl2:
+    Type: String
+    Default: govSananga-img-analysis
+    Description: DynamoDB table for image analysis
+
+Resources:
+
+  GovSanangaS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+
+  GovSanangaMainTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref DynamoTbl1
+      AttributeDefinitions:
+        - AttributeName: coordinates
+          AttributeType: S
+        - AttributeName: group
+          AttributeType: S
+      KeySchema:
+        - AttributeName: coordinates
+          KeyType: HASH
+        - AttributeName: group
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+
+  GovSanangaImageAnalysisTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref DynamoTbl2
+      AttributeDefinitions:
+        - AttributeName: coordinates-heading
+          AttributeType: S
+        - AttributeName: group
+          AttributeType: S
+      KeySchema:
+        - AttributeName: coordinates-heading
+          KeyType: HASH
+        - AttributeName: group
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+
+Outputs:
+  BucketOutput:
+    Description: "Name of the created S3 Bucket"
+    Value: !Ref GovSanangaS3Bucket
+
+  MainTableOutput:
+    Description: "Name of the created main DynamoDB table"
+    Value: !Ref GovSanangaMainTable
+
+  ImageAnalysisTableOutput:
+    Description: "Name of the created image analysis DynamoDB table"
+    Value: !Ref GovSanangaImageAnalysisTable
+
