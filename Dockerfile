@@ -28,9 +28,10 @@ USER appuser
 # Set working directory for the non-root user
 WORKDIR /app
 
-# Copy application code and install Python dependencies
-COPY --chown=appuser:appuser app/ ./app/
-COPY --chown=appuser:appuser requirements.txt .
+COPY app/ ./app/
+COPY requirements.txt .
+RUN chown -R appuser:appuser /app
+
 
 # Install dependencies locally for appuser
 RUN pip install --no-cache-dir --user -r requirements.txt
@@ -40,4 +41,3 @@ EXPOSE 8501
 
 # Run the Streamlit app
 CMD ["streamlit", "run", "app/main.py", "--server.baseUrlPath=/govsananga", "--server.enableCORS=false"]
-
