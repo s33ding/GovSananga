@@ -1,10 +1,10 @@
 # Use the official Python image
 FROM public.ecr.aws/docker/library/python:3.10-slim
 
-# Set environment variables
-ENV AWS_DEFAULT_REGION=us-east-1
 ENV AWS_PAGER=""
 ENV PATH="/home/appuser/.local/bin:$PATH"
+ENV PYTHONPATH=/app
+
 
 # Set working directory
 WORKDIR /app
