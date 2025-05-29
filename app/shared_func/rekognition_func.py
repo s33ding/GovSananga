@@ -1,10 +1,12 @@
 import boto3
 import requests
 from io import BytesIO
+from app.config import region_name
+
 
 def analyze_image(image_url):
     # Initialize the Rekognition client
-    client = boto3.client('rekognition', region_name=config.region_name)
+    client = boto3.client('rekognition', region_name=region_name)
 
     # Download the image from the provided URL
     response = requests.get(image_url)
@@ -26,7 +28,7 @@ def analyze_image(image_url):
 
 def check_for_store_in_image(image_url):
     # Initialize Rekognition client
-    client = boto3.client('rekognition', region_name=config.region_name)
+    client = boto3.client('rekognition', region_name=region_name)
 
     # Download the image from the provided URL
     response = requests.get(image_url)

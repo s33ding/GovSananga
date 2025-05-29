@@ -1,13 +1,9 @@
 import boto3
 import json
-
-# Add parent directory to Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-import config
+from app.config import region_name
 
 # Initialize DynamoDB resource
-dynamodb = boto3.resource('dynamodb',region_name=config.region_name)
+dynamodb = boto3.resource('dynamodb',region_name=region_name)
 
 def get_secret(secret_name):
     """
@@ -31,7 +27,7 @@ def get_secret(secret_name):
     
     return dct
 
-def list_secrets(region_name='us-east-1', verbose=True):
+def list_secrets(region_name=region_name, verbose=True):
     """
     List secrets in AWS Secrets Manager.
 
@@ -42,7 +38,7 @@ def list_secrets(region_name='us-east-1', verbose=True):
     list: List of secret names.
     """
     # Initialize the Secrets Manager client
-    client = boto3.client('secretsmanager', region_name=config.region_name)
+    client = boto3.client('secretsmanager', region_name=region_name)
 
     # Call the list_secrets API
     response = client.list_secrets()
@@ -55,7 +51,7 @@ def list_secrets(region_name='us-east-1', verbose=True):
 
     return secret_names
 
-def create_secret(secret_name, secret_value_json, region_name=config.region_name):
+def create_secret(secret_name, secret_value_json, region_name=region_name):
     """
     Create a new secret in AWS Secrets Manager.
 
@@ -81,7 +77,7 @@ def create_secret(secret_name, secret_value_json, region_name=config.region_name
 
     return response
 
-def delete_secret(secret_name, region_name=config.region_name):
+def delete_secret(secret_name, region_name=region_name):
     """
     Delete a secret from AWS Secrets Manager.
 

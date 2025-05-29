@@ -4,13 +4,10 @@ import boto3
 from botocore.exceptions import ClientError
 import pandas as pd
 from decimal import Decimal
-# Add parent directory to Python path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-import config
+from app.config import region_name
 
 # Initialize DynamoDB resource
-dynamodb = boto3.resource('dynamodb',region_name=config.region_name)
+dynamodb = boto3.resource('dynamodb',region_name=region_name)
 
 def insert_df_to_dynamodb(df, table_name):
     df = df.astype(str)
