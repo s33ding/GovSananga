@@ -4,9 +4,9 @@ import boto3
 from botocore.exceptions import ClientError
 import pandas as pd
 from decimal import Decimal
-from app.config import region_name
 
 # Initialize DynamoDB resource
+region_name="us-east-1"
 dynamodb = boto3.resource('dynamodb',region_name=region_name)
 
 def insert_df_to_dynamodb(df, table_name):

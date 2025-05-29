@@ -1,8 +1,8 @@
 import boto3
 import requests
 from io import BytesIO
-from app.config import region_name
 
+region_name="us-east-1"
 
 def analyze_image(image_url):
     # Initialize the Rekognition client

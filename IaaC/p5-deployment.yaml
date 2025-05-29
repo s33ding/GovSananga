@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: govsananga-deployment
+  labels:
+    app: govsananga
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: govsananga
+  template:
+    metadata:
+      labels:
+        app: govsananga
+    spec:
+      serviceAccountName: govsananga-sa
+      containers:
+        - name: govsananga
+          image: 248189947068.dkr.ecr.us-east-1.amazonaws.com/govsananga:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8501
+          command: ["streamlit", "run", "app/main.py", "--server.baseUrlPath=/govsananga", "--server.enableCORS=false"]
+

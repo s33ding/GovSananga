@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: govsananga-svc
+  labels:
+    app: govsananga
+spec:
+  selector:
+    app: govsananga
+  ports:
+    - protocol: TCP
+      port: 80        # Port exposed to the ingress
+      targetPort: 8501  # Port exposed by the container
+  type: ClusterIP

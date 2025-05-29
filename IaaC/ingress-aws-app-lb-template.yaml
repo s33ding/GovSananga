@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: default
+  name: ingress-iesb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /jupyter
+            pathType: Prefix
+            backend:
+              service:
+                name: pyspark-service
+                port:
+                  number: 80
+          - path: /grafana
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana-service
+                port:
+                  number: 80
+          - path: /metabase
+            pathType: Prefix
+            backend:
+              service:
+                name: metabase-service
+                port:
+                  number: 80
+          - path: /spark
+            pathType: Prefix
+            backend:
+              service:
+                name: my-spark-master-svc
+                port:
+                  number: 80
+          - path: /govsananga
+            pathType: Prefix
+            backend:
+              service:
+                name: govsananga-svc
+                port:
+                  number: 80
+

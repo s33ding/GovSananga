@@ -10,11 +10,10 @@ import math
 from PIL import Image
 from io import BytesIO
 import boto3
-from app.config import region_name
-
 # Initialize DynamoDB resource
+
+region_name="us-east-1"
 dynamodb = boto3.resource('dynamodb',region_name=region_name)
-print(region_name)
 
 # Fetch the API key once and reuse it
 gcp_api_key = get_secret("s33ding").get("gcp")

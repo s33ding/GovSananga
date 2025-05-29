@@ -1,9 +1,7 @@
 import boto3
 import json
-from app.config import region_name
 
-# Initialize DynamoDB resource
-dynamodb = boto3.resource('dynamodb',region_name=region_name)
+region_name="us-east-1"
 
 def get_secret(secret_name):
     """
