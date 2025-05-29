@@ -2,8 +2,8 @@ import os
 import googlemaps
 import time
 
-# Global Variables
-api_key = os.environ.get("GCP_KEY")
+# Fetch the API key once and reuse it
+api_key = get_secret("s33ding").get("gcp")
 
 gmaps = googlemaps.Client(key=api_key)
 

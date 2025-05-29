@@ -10,3 +10,4 @@ lambda_1_label_img="arn:aws:lambda:us-east-1:408411726795:function:govSananga-la
 gsv_fov = 65
 img_repo_path = "media/gpt-img-repo.webp"
 img_map_path = "static/images/realistic_road_network_map.png"
+region_name = "us-east-1"

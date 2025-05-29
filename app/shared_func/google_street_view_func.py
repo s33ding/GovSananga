@@ -11,6 +11,14 @@ from PIL import Image
 from io import BytesIO
 import boto3
 
+# Add parent directory to Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import config
+
+# Initialize DynamoDB resource
+dynamodb = boto3.resource('dynamodb',region_name=config.region_name)
+print(region_name)
 
 # Fetch the API key once and reuse it
 gcp_api_key = get_secret("s33ding").get("gcp")
@@ -131,7 +139,8 @@ def is_uniform_image(image, threshold=15):
 
 def upload_to_s3(file_path, bucket_name, key_name):
     # Initialize the S3 client
-    s3_client = boto3.client("s3")
+    s3_client = boto3.client("s3", region_name=config.region_name)
+
     s3_path = f"s3://{bucket_name}/{key_name}"
     s3_client.upload_file(file_path, bucket_name, key_name)
     print(f"Uploaded {file_path} to {s3_path}")
