@@ -7,10 +7,16 @@ ENV AWS_DEFAULT_REGION=us-east-1
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies (libexpat1 and vim)
+# Install system dependencies (libexpat1, vim, unzip, curl) and AWS CLI
 RUN apt-get update && apt-get install -y \
     libexpat1 \
     vim \
+    curl \
+    unzip \
+    && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip \
+    && ./aws/install \
+    && rm -rf awscliv2.zip aws \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the rest of the application code
