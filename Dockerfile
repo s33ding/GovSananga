@@ -2,6 +2,8 @@
 #FROM python:3.10-slim
 FROM public.ecr.aws/docker/library/python:3.10-slim
 
+ENV AWS_DEFAULT_REGION=us-east-1
+
 # Set working directory
 WORKDIR /app
 
