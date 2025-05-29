@@ -4,6 +4,7 @@ FROM public.ecr.aws/docker/library/python:3.10-slim
 # Set environment variables
 ENV AWS_DEFAULT_REGION=us-east-1
 ENV AWS_PAGER=""
+ENV PATH="/home/appuser/.local/bin:$PATH"
 
 # Set working directory
 WORKDIR /app
@@ -24,18 +25,19 @@ RUN apt-get update && apt-get install -y \
 RUN useradd -ms /bin/bash appuser
 USER appuser
 
-# Re-set the working directory for the non-root user
+# Set working directory for the non-root user
 WORKDIR /app
 
 # Copy application code and install Python dependencies
 COPY --chown=appuser:appuser app/ ./app/
 COPY --chown=appuser:appuser requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies locally for appuser
+RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Expose Streamlit port
 EXPOSE 8501
 
 # Run the Streamlit app
-CMD ["streamlit", "run", "app/main.py"]
+CMD ["streamlit", "run", "app/main.py", "--server.baseUrlPath=/govsananga", "--server.enableCORS=false"]
 
