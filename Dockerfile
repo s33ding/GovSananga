@@ -1,13 +1,14 @@
 # Use the official Python image
-#FROM python:3.10-slim
 FROM public.ecr.aws/docker/library/python:3.10-slim
 
+# Set environment variables
 ENV AWS_DEFAULT_REGION=us-east-1
+ENV AWS_PAGER=""
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies (libexpat1, vim, unzip, curl) and AWS CLI
+# Install system dependencies and AWS CLI
 RUN apt-get update && apt-get install -y \
     libexpat1 \
     vim \
@@ -19,16 +20,20 @@ RUN apt-get update && apt-get install -y \
     && rm -rf awscliv2.zip aws \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy the rest of the application code
-COPY app/ ./app/
+# Create a non-root user and switch to it
+RUN useradd -ms /bin/bash appuser
+USER appuser
 
-# Copy the requirements file
-COPY requirements.txt .
+# Re-set the working directory for the non-root user
+WORKDIR /app
 
-# Install Python dependencies
+# Copy application code and install Python dependencies
+COPY --chown=appuser:appuser app/ ./app/
+COPY --chown=appuser:appuser requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose the port Streamlit runs on
+# Expose Streamlit port
 EXPOSE 8501
 
 # Run the Streamlit app
