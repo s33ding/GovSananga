@@ -6,7 +6,21 @@ ENV PATH="/home/appuser/.local/bin:$PATH"
 ENV PYTHONPATH=/app
 
 
+RUN useradd -ms /bin/bash appuser
+
 # Set working directory
+WORKDIR /app
+
+COPY app/ ./app/
+COPY requirements.txt .
+
+# Set ownership while still root
+RUN chown -R appuser:appuser /app
+
+# Now switch to non-root user
+USER appuser
+
+# Set working directory again for appuser (optional, for clarity)
 WORKDIR /app
 
 # Install system dependencies and AWS CLI
@@ -21,20 +35,10 @@ RUN apt-get update && apt-get install -y \
     && rm -rf awscliv2.zip aws \
     && rm -rf /var/lib/apt/lists/*
 
-# Create a non-root user and switch to it
-RUN useradd -ms /bin/bash appuser
-USER appuser
-
-# Set working directory for the non-root user
-WORKDIR /app
-
-COPY app/ ./app/
-COPY requirements.txt .
-RUN chown -R appuser:appuser /app
-
-
 # Install dependencies locally for appuser
 RUN pip install --no-cache-dir --user -r requirements.txt
+# Set working directory
+WORKDIR /app
 
 # Expose Streamlit port
 EXPOSE 8501
