@@ -53,7 +53,7 @@ def process_images_for_groups(df):
 def main():
     global gdf, df  # Define as global to access after testing
     # Load or download network data
-    gdf = download_network(city=config.city)
+    gdf = download_network()
 
     # Prepare DataFrame and set up coordinates/groups
     df = prepare_data(gdf)
