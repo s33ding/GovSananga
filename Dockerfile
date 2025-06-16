@@ -5,7 +5,7 @@ ENV AWS_PAGER=""
 ENV PATH="/home/appuser/.local/bin:$PATH"
 ENV PYTHONPATH=/app
 
-
+# Create user before switching
 RUN useradd -ms /bin/bash appuser
 
 # Set working directory
@@ -14,16 +14,7 @@ WORKDIR /app
 COPY app/ ./app/
 COPY requirements.txt .
 
-# Set ownership while still root
-RUN chown -R appuser:appuser /app
-
-# Now switch to non-root user
-USER appuser
-
-# Set working directory again for appuser (optional, for clarity)
-WORKDIR /app
-
-# Install system dependencies and AWS CLI
+# Install system dependencies and AWS CLI as root (must be before switching users!)
 RUN apt-get update && apt-get install -y \
     libexpat1 \
     vim \
@@ -35,13 +26,21 @@ RUN apt-get update && apt-get install -y \
     && rm -rf awscliv2.zip aws \
     && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies locally for appuser
-RUN pip install --no-cache-dir --user -r requirements.txt
-# Set working directory
+# Set ownership for non-root user
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
+# Set working directory again for appuser (optional)
 WORKDIR /app
+
+# Install Python dependencies as appuser
+RUN pip install --no-cache-dir --user -r requirements.txt
 
 # Expose Streamlit port
 EXPOSE 8501
 
 # Run the Streamlit app
 CMD ["streamlit", "run", "app/main.py", "--server.baseUrlPath=/govsananga", "--server.enableCORS=false"]
+
