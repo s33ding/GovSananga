@@ -42,5 +42,4 @@ RUN pip install --no-cache-dir --user -r requirements.txt
 EXPOSE 8501
 
 # Run the Streamlit app
-CMD ["streamlit", "run", "app/app.py", "--server.baseUrlPath=/govsananga", "--server.enableCORS=false"]
-
+CMD ["streamlit", "run", "app.py", "--server.baseUrlPath=/govsananga", "--server.enableCORS=false"]
