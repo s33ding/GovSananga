@@ -11,7 +11,7 @@ RUN useradd -ms /bin/bash appuser
 # Set working directory
 WORKDIR /app
 
-COPY app/ ./app/
+COPY app/ ./
 COPY requirements.txt .
 
 # Install system dependencies and AWS CLI as root (must be before switching users!)
