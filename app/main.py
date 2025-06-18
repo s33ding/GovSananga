@@ -20,11 +20,12 @@ def download_network(city):
     """Load or download the road network data based on configuration."""
     return osmnx_func.get_road_network(city)
 
-def prepare_data(gdf):
+def prepare_data(gdf,city):
     """Extract coordinates, group data, and prepare for processing."""
     df = osmnx_func.extract_coordinates(gdf)
     df["coordinates"] = df["coordinates"].apply(lambda x: (round(x[0], DECIMAL_PLACES), round(x[1], DECIMAL_PLACES)))
     df["group"] = df["start_node"].astype(str) + "-" + df["end_node"].astype(str)
+    df["city"] = city
     return df
 
 def process_data(df):
@@ -56,11 +57,11 @@ def main():
     gdf = download_network(city)
 
     # Prepare DataFrame and set up coordinates/groups
-    df = prepare_data(gdf)
+    df = prepare_data(gdf,city)
 
     # Process data by cleaning, sorting, and assigning order
     df = process_data(df)
-
+    
     # Process images and upload to S3
     process_images_for_groups(df)
 
