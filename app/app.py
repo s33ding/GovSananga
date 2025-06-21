@@ -15,10 +15,6 @@ import streamlit as st
 import os
 from PIL import Image
 
-def download_network(city):
-    """Load or download the road network data based on configuration."""
-    return osmnx_func.get_road_network(city)
-
 def prepare_data(gdf):
     """Extract coordinates, group data, and prepare for processing."""
     df = osmnx_func.extract_coordinates(gdf)
@@ -51,7 +47,7 @@ def process_images_for_groups(df):
 
 
 def home():
-    global gdf, df  
+    global gdf, df
     if request.method == 'POST':
         # Get form data
         name = request.form.get('city')
@@ -61,15 +57,15 @@ def home():
             'City Name': name,
         }
 
-        gdf = download_network(city=name)
+        gdf = osmnx_func.get_road_network(city=name)
 
         image_path = os.path.join('static', 'images', 'realistic_road_network_map.png')
         osmnx_func.plot_realistic_road_network(gdf, place_name, output_image=image_path)
-        
+
 #        df = prepare_data(gdf)
 #
 #        df = process_data(df)
-#        
+#
 #
 #        process_images_for_groups(df)
 
@@ -102,7 +98,7 @@ if st.button("Generate Map"):
         st.write(f"Processing for: **{city_name}**...")
 
         # Download the network data
-        gdf = osmnx_func.download_network(city=city_name)
+        gdf = osmnx_func.get_road_network(city=city_name)
 
         # Generate the image path
         image_path = config.img_map_path
@@ -119,3 +115,4 @@ if st.button("Generate Map"):
             st.error("Failed to generate the road network map.")
     else:
         st.warning("Please enter a city name before generating the map.")
+
