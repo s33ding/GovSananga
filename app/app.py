@@ -90,15 +90,15 @@ st.image(Image.open(config.img_repo_path))
 st.write("Enter a city name to view its road network map.")
 
 # Input form for city name
-city_name = st.text_input("City Name:", "")
+place = st.text_input("Place Name:", "")
 
 # Button to trigger processing
 if st.button("Generate Map"):
-    if city_name:
-        st.write(f"Processing for: **{city_name}**...")
+    if place:
+        st.write(f"Processing for: **{place}**...")
 
         # Download the network data
-        gdf = osmnx_func.get_road_network(city=city_name)
+        gdf = osmnx_func.get_road_network(place)
 
         # Generate the image path
         image_path = config.img_map_path
@@ -106,7 +106,7 @@ if st.button("Generate Map"):
         os.makedirs(image_path, exist_ok=True)
 
         # Generate the road network map
-        osmnx_func.plot_realistic_road_network(gdf, city_name, output_image=image_path)
+        osmnx_func.plot_realistic_road_network(gdf, place, output_image=image_path)
 
         # Display the updated image
         if os.path.exists(image_path):
