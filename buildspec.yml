@@ -7,14 +7,13 @@ env:
     ACCOUNT_ID: "248189947068"
     CLUSTER_NAME: "sas-6881323-eks"
     REPOSITORY: "govsananga"
-    DEPLOYMENT_NAME: "govsananga"
+    DEPLOYMENT_NAME: "govsananga-deployment"  # Corrected name
     CONTAINER_NAME: "govsananga"
 
 cache:
   paths:
     - '/root/.cache/pip/**/*'
   local:
-    # Speeds up builds by caching Docker layers and pip packages
     paths:
       - docker-layer-cache
       - pip-cache
@@ -28,7 +27,7 @@ phases:
       - curl -LO "https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl"
       - chmod +x kubectl
       - mv kubectl /usr/local/bin/
-      - echo Verifying kubectl installation...
+      - echo Verifying kubectl...
       - kubectl version --client
       - pip install --upgrade awscli
 
