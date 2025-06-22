@@ -25,23 +25,35 @@ def plot_realistic_road_network(gdf, place_name, output_image="realistic_road_ne
     plt.savefig(output_image, bbox_inches="tight", dpi=300)
     plt.close()
 
+import os
+import osmnx as ox
+
 def get_road_network(place_name, output_file="roads.geojson"):
     """
     Retrieve the road network for a given place and save it to a GeoJSON file.
-    
+
     Parameters:
     place_name (str): The name of the place to retrieve the road network for.
     output_file (str): The file path where the GeoJSON will be saved. Default is 'roads.geojson'.
     """
     # Retrieve road network from OSM
     G = ox.graph_from_place(place_name, network_type="all")
-    
+
     # Get road edges (links between intersections)
     gdf = ox.graph_to_gdfs(G, nodes=False, edges=True)
-    plot_realistic_road_network(gdf, place_name, "output/road_network_map.png")
 
-    
+    # Ensure output directory exists for the map
+    map_output_path = "output/road_network_map.png"
+    os.makedirs(os.path.dirname(map_output_path), exist_ok=True)
+
+    # Call the plotting function (make sure it's defined elsewhere in your code)
+    plot_realistic_road_network(gdf, place_name, map_output_path)
+
+    # Save GeoJSON
+    gdf.to_file(output_file, driver="GeoJSON")
+
     return gdf
+
 
 def save_road_network(gdf, output_file="roads.geojson"):
     # Save to a GeoJSON or shapefile
