@@ -2,4 +2,8 @@ venv/
 *.swn
 *.swo
 *.swp
-
+app/cache/*.json
+__pycache__/
+app/output/
+app/static/images/
+app/shared_func/__pycache__/

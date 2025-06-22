@@ -4,56 +4,46 @@ import matplotlib.pyplot as plt
 import contextily as ctx
 
 def plot_realistic_road_network(gdf, place_name, output_image="realistic_road_network_map.png"):
-    """
-    Plot the road network on a map with realistic context and save the image.
+    import os
+    import matplotlib.pyplot as plt
+    import contextily as ctx
 
-    Parameters:
-    gdf (GeoDataFrame): The GeoDataFrame containing road network edges.
-    place_name (str): The name of the place to display as the map title.
-    output_image (str): The file path where the image will be saved.
-    """
+    # If the output_image is a directory, convert it into a file path
+    if os.path.isdir(output_image):
+        print(f"[WARN] Output path '{output_image}' is a directory. Saving to 'road_map.png' inside it.")
+        output_image = os.path.join(output_image, "road_map.png")
+
+    # Ensure parent directory exists
+    os.makedirs(os.path.dirname(output_image), exist_ok=True)
+
     fig, ax = plt.subplots(figsize=(10, 10))
     ax.set_title(f"Road Network in {place_name}", fontsize=15)
 
-    # Plot the road network
     gdf.plot(ax=ax, linewidth=0.7, color="blue", alpha=0.7)
-
     ctx.add_basemap(ax, source=ctx.providers.OpenStreetMap.Mapnik)
 
-
-    # Save the plot as an image file
     plt.savefig(output_image, bbox_inches="tight", dpi=300)
     plt.close()
+    print(f"[INFO] Road network image saved to: {output_image}")
 
-import os
-import osmnx as ox
 
 def get_road_network(place_name, output_file="roads.geojson"):
     """
     Retrieve the road network for a given place and save it to a GeoJSON file.
-
+    
     Parameters:
     place_name (str): The name of the place to retrieve the road network for.
     output_file (str): The file path where the GeoJSON will be saved. Default is 'roads.geojson'.
     """
     # Retrieve road network from OSM
     G = ox.graph_from_place(place_name, network_type="all")
-
+    
     # Get road edges (links between intersections)
     gdf = ox.graph_to_gdfs(G, nodes=False, edges=True)
+    plot_realistic_road_network(gdf, place_name, "output/road_network_map.png")
 
-    # Ensure output directory exists for the map
-    map_output_path = "output/road_network_map.png"
-    os.makedirs(os.path.dirname(map_output_path), exist_ok=True)
-
-    # Call the plotting function (make sure it's defined elsewhere in your code)
-    plot_realistic_road_network(gdf, place_name, map_output_path)
-
-    # Save GeoJSON
-    gdf.to_file(output_file, driver="GeoJSON")
-
+    
     return gdf
-
 
 def save_road_network(gdf, output_file="roads.geojson"):
     # Save to a GeoJSON or shapefile

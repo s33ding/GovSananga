@@ -4,6 +4,7 @@ import json
 # Function to invoke another Lambda function
 def invoke_lambda(my_payload, lambda_name, invocation_type):
   client = boto3.client("lambda")
+  print(my_payload)
   response = client.invoke(
       FunctionName = lambda_name,
       InvocationType = invocation_type, # best options: RequestResponse or Event

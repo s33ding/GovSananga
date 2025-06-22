@@ -2,6 +2,8 @@
 
 This project, titled "Gov Sananga," aims to map and analyze formal and informal enterprises in Cidade Estrutural, leveraging advanced machine learning techniques, Google Street View data, and OSINT (Open Source Intelligence) methods. By utilizing tools such as Kubernetes (K8s), Terraform, GPT for image analysis, and Google API for structured data scraping, the project seeks to create a comprehensive database that visualizes and examines economic activities in the region. The goal is to contribute valuable insights for public policies that support the formalization and sustainable growth of informal businesses in underdeveloped areas.
 
+-Gardênia Azul
+
 
 ![media/gpt-img-repo.webp](https://raw.githubusercontent.com/s33ding/GovSananga/refs/heads/main/streamlit/app/media/gpt-img-repo.webp)
 

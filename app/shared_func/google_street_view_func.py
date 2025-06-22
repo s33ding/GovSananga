@@ -14,6 +14,7 @@ import boto3
 
 region_name="us-east-1"
 dynamodb = boto3.resource('dynamodb',region_name=region_name)
+s3_client = boto3.client("s3")
 
 # Fetch the API key once and reuse it
 gcp_api_key = get_secret("s33ding").get("gcp")
@@ -132,53 +133,80 @@ def is_uniform_image(image, threshold=15):
     # If standard deviation is below the threshold, the image is uniform
     return stddev < threshold
 
-def upload_to_s3(file_path, bucket_name, key_name):
-    # Initialize the S3 client
-    s3_client = boto3.client("s3", region_name=region_name)
 
-    s3_path = f"s3://{bucket_name}/{key_name}"
-    s3_client.upload_file(file_path, bucket_name, key_name)
-    print(f"Uploaded {file_path} to {s3_path}")
 
-def automate_street_view_images(df, group_name,verbose=False):                                     
-    # Filter DataFrame based on the specified group name and reset index
+def upload_to_s3(image_content, s3_key):
+    s3_client.upload_fileobj(BytesIO(image_content), bucket_name, s3_key)
+    # Generate pre-signed URL valid for 1 hour
+    return s3_client.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": bucket_name, "Key": s3_key},
+        ExpiresIn=3600
+    )
+
+def automate_street_view_images(df, group_name, bucket_name, region,verbose=False):
     filtered_df = df[df["group"] == group_name].reset_index(drop=True)
-    
-    # Define output directory and ensure it's clean
-    folder_name = f"output/street-view/group-{group_name}"                           
+    folder_name = f"output/street-view/group-{group_name}"
     create_clean_folder(folder_name)
 
     if verbose:
         print(f"Output directory created: {folder_name}")
 
-    # Initialize s3_path column
     filtered_df["s3_path"] = None
 
-    # Iterate over each row in the filtered DataFrame
     for i, row in filtered_df.iterrows():
         location = row["coordinates"]
+        place = row["place"]
         order = int(row["order"])
-        # If coordinates are provided, generate images at 4 headings
+
         if location is not None:
-            lst_valid_url = [] 
             for heading in [0, 90, 180, 270]:
-                request_url = get_street_view_image(group_name=group_name, location=location, heading=heading, order=order)
-                if request_url:  
-                    filtered_df.at[i, f"request_url_heading_{heading}"] = request_url # url from the GSV
-                    my_payload = {
-                                "url":request_url,
-                                "location": f"({location[0]},{location[1]})",  
-                                "heading":heading,
-                                "order":order,
-                                "group":group_name
+                request_url = get_street_view_image(
+                    group_name=group_name,
+                    location=location,
+                    heading=heading,
+                    order=order
+                )
+
+                if request_url:
+                    try:
+                        # Fetch image from Google Street View
+                        response = requests.get(request_url, headers={"User-Agent": "Mozilla/5.0"})
+                        if response.status_code == 200:
+                            # Upload image to S3
+                            s3_key = f"street_view/{place}/{group_name}/order_{order}_heading_{heading}.jpg"
+                            s3_client = boto3.client("s3")
+                            s3_client.upload_fileobj(BytesIO(response.content), bucket_name, s3_key)
+
+                            # Store S3 path in DataFrame
+                            filtered_df.at[i, "s3_path"] = s3_key
+                            link = f"https://{bucket_name}.s3.{region}.amazonaws.com/{s3_key}"
+                            filtered_df.at[i, f"request_url_heading_{heading}"] = link
+
+
+                            # Prepare payload for Lambda (bucket/key, not URL)
+                            my_payload = {
+                                "bucket": bucket_name,
+                                "key": s3_key,
+                                "place": place,
+                                "location": f"({location[0]},{location[1]})",
+                                "heading": heading,
+                                "order": order,
+                                "group": group_name,
+                                "s3_link": link
                             }
 
-                    print(my_payload)
-                    
-                    invoke_lambda(
-                            my_payload=my_payload, 
-                            lambda_name=config.lambda_1_label_img, 
-                            invocation_type="Event"
+                            if verbose:
+                                print(my_payload)
+
+                            invoke_lambda(
+                                my_payload=my_payload,
+                                lambda_name=config.lambda_1_label_img,
+                                invocation_type="Event"
                             )
+                        else:
+                            print(f"Failed to download image (HTTP {response.status_code}): {request_url}")
+                    except Exception as e:
+                        print(f"Error processing heading {heading} for order {order}: {e}")
 
     return filtered_df
