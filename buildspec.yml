@@ -10,6 +10,15 @@ env:
     DEPLOYMENT_NAME: "govsananga"
     CONTAINER_NAME: "govsananga"
 
+cache:
+  paths:
+    - '/root/.cache/pip/**/*'
+  local:
+    # Speeds up builds by caching Docker layers and pip packages
+    paths:
+      - docker-layer-cache
+      - pip-cache
+
 phases:
   install:
     runtime-versions:
@@ -19,7 +28,7 @@ phases:
       - curl -LO "https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl"
       - chmod +x kubectl
       - mv kubectl /usr/local/bin/
-      - echo Verifying kubectl...
+      - echo Verifying kubectl installation...
       - kubectl version --client
       - pip install --upgrade awscli
 
@@ -45,7 +54,9 @@ phases:
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - docker push $REPOSITORY_URI:latest
       - echo Build completed on `date`
-      - echo Updating deployment in EKS...
+      - echo Ensuring deployment exists in EKS...
+      - kubectl apply -f deployment.yaml
+      - echo Updating deployment image in EKS...
       - kubectl set image deployment/$DEPLOYMENT_NAME $CONTAINER_NAME=$REPOSITORY_URI:$IMAGE_TAG -n default
       - kubectl rollout status deployment/$DEPLOYMENT_NAME -n default
 
