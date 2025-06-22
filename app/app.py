@@ -6,19 +6,52 @@ from PIL import Image
 import config
 from shared_func import osmnx_func, etl_func, google_street_view_func, dynamo_func
 import unicodedata
-import logging
-
+import requests
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
 
 DECIMAL_PLACES = 6  # Adjust as needed
 
 # Streamlit page config
 st.set_page_config(page_title="GovSananga", layout="wide")
 
-# UI Header
+# --- Cognito Login Function --- #
+def cognito_login():
+    st.subheader("Login")
+    username = st.text_input("Email", key="username")
+    password = st.text_input("Password", type="password", key="password")
+    login_status = st.empty()
+
+    if st.button("Login"):
+        try:
+            response = requests.post(
+                "https://hewx1kjfxh.execute-api.us-east-1.amazonaws.com/prod/dataiesb-auth",
+                json={"username": username, "password": password},
+                headers={"Content-Type": "application/json"}
+            )
+
+            if response.ok:
+                data = response.json()
+                st.session_state["authenticated"] = True
+                st.session_state["idToken"] = data.get("idToken", "")
+                login_status.success("Login successful!")
+                return True
+            else:
+                login_status.error(response.json().get("message", "Login failed."))
+        except Exception as e:
+            login_status.error(f"Error: {str(e)}")
+    return False
+
+# --- Auth Check --- #
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+
+if not st.session_state["authenticated"]:
+    if not cognito_login():
+        st.stop()
+
+# --- App UI --- #
 st.title("GovSananga")
 st.image(Image.open(config.img_repo_path))
 st.write("Enter a place name to view its road network map.")
@@ -26,27 +59,21 @@ st.write("Enter a place name to view its road network map.")
 # User Input
 place = st.text_input("Place name:", "")
 
-# Functions
+# --- Functions --- #
 def download_network(place):
     logging.debug(f"Downloading road network for: {place}")
     return osmnx_func.get_road_network(place)
 
-
-
 def normalize_place(s):
-    """Normalize a place name from raw input or S3-style path."""
     try:
-        # Extract if it's a path
         if "/" in s:
             s = s.split("/")[1]
-        # Normalize accents, lowercase, trim, and replace spaces
         normalized = unicodedata.normalize("NFKD", s).encode("ASCII", "ignore").decode("utf-8")
         return normalized.strip().lower().replace(" ", "_")
     except Exception:
         return ""
 
 def prepare_data(gdf, place):
-    """Extract coordinates, normalize place name, and build group identifier."""
     df = osmnx_func.extract_coordinates(gdf)
     df["coordinates"] = df["coordinates"].apply(
         lambda x: (round(x[0], DECIMAL_PLACES), round(x[1], DECIMAL_PLACES))
@@ -56,7 +83,6 @@ def prepare_data(gdf, place):
     df["group"] = df.apply(lambda row: f"{normalized}-{row['start_node']}-{row['end_node']}", axis=1)
 
     logging.debug("Prepared DataFrame:\n%s", df.head())
-    print(df)
     return df
 
 def process_data(df):
@@ -77,11 +103,11 @@ def process_images_for_groups(df):
             break
         group_df = df[df["group"] == group_name].copy()
         logging.debug(f"Processing group {group_name} ({i+1})")
-        filtered_df = google_street_view_func.automate_street_view_images(df, group_name,config.bucket_name,config.region_name)
+        filtered_df = google_street_view_func.automate_street_view_images(df, group_name, config.bucket_name, config.region_name)
         logging.debug(f"Filtered DataFrame for {group_name}: \n{filtered_df.head()}")
         dynamo_func.insert_df_to_dynamodb(df=filtered_df, table_name=config.dynamo_tbl_1)
 
-# Main logic
+# --- Main Logic --- #
 if st.button("Generate Map"):
     if place:
         try:
@@ -90,7 +116,7 @@ if st.button("Generate Map"):
             image_path = config.img_map_path
             os.makedirs(os.path.dirname(image_path), exist_ok=True)
             osmnx_func.plot_realistic_road_network(gdf, place, output_image=image_path)
-            
+
             if os.path.isfile(image_path):
                 st.image(Image.open(image_path), caption=f"Road Network Map for {place}", use_column_width=True)
                 logging.debug("Map image displayed successfully.")
@@ -98,7 +124,7 @@ if st.button("Generate Map"):
                 st.error("Failed to generate the road network map.")
                 logging.error("Image file not found after generation.")
 
-            df = prepare_data(gdf,place)
+            df = prepare_data(gdf, place)
             df = process_data(df)
             process_images_for_groups(df)
             logging.info("Processing complete.")
