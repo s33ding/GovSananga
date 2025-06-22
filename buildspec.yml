@@ -1,19 +1,42 @@
 version: 0.2
 
+env:
+  variables:
+    ECR_REGION: "us-east-1"
+    EKS_REGION: "sa-east-1"
+    ACCOUNT_ID: "248189947068"
+    CLUSTER_NAME: "sas-6881323-eks"
+    REPOSITORY: "govsananga"
+    DEPLOYMENT_NAME: "govsananga"
+    CONTAINER_NAME: "govsananga"
+
 phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - echo Installing kubectl...
+      - curl -LO "https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl"
+      - chmod +x kubectl
+      - mv kubectl /usr/local/bin/
+      - echo Verifying kubectl...
+      - kubectl version --client
+      - pip install --upgrade awscli
+
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
+      - echo Logging in to Amazon ECR in $ECR_REGION...
       - aws --version
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 248189947068.dkr.ecr.us-east-1.amazonaws.com
-
-      - REPOSITORY_URI=248189947068.dkr.ecr.us-east-1.amazonaws.com/govsananga
+      - aws ecr get-login-password --region $ECR_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$ECR_REGION.amazonaws.com
+      - REPOSITORY_URI=$ACCOUNT_ID.dkr.ecr.$ECR_REGION.amazonaws.com/$REPOSITORY
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - echo Updating kubeconfig for EKS in $EKS_REGION...
+      - aws eks update-kubeconfig --region $EKS_REGION --name $CLUSTER_NAME
 
   build:
     commands:
       - echo Building the Docker image...
-      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker build -t $REPOSITORY_URI:$IMAGE_TAG -f Dockerfile .
       - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:latest
 
   post_build:
@@ -22,6 +45,9 @@ phases:
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - docker push $REPOSITORY_URI:latest
       - echo Build completed on `date`
+      - echo Updating deployment in EKS...
+      - kubectl set image deployment/$DEPLOYMENT_NAME $CONTAINER_NAME=$REPOSITORY_URI:$IMAGE_TAG -n default
+      - kubectl rollout status deployment/$DEPLOYMENT_NAME -n default
 
 artifacts:
   files:
