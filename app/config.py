@@ -9,7 +9,7 @@ bucket_name = "gov-sananga"
 dynamo_tbl_1 = "govSananga-main"
 dynamo_tbl_2 = "govSananga-img-analysis"
 region = "us-east-1"
-limit_loop = 3
+limit_loop = 1
 lambda_1_label_img="arn:aws:lambda:us-east-1:248189947068:function:govSananga-label"
 gsv_fov = 65
 

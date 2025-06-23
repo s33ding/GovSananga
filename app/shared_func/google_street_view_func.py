@@ -32,63 +32,84 @@ def create_clean_folder(folder_name):
     os.makedirs(folder_name, exist_ok=True)
     
 
-def get_street_view_image(group_name, location, heading, pitch=0, fov=config.gsv_fov, order=None,delete=True,verbose=False):
-    global response
+def get_street_view_image(
+    group_name,
+    location,
+    heading,
+    pitch=0,
+    fov=config.gsv_fov,
+    order=None,
+    local_name=None,
+    bucket_name="gov-sananga",
+    s3_key="",
+    verbose=False
+):
     """
-    Fetches a Google Street View image for the given location and heading, and saves it if valid.
+    Fetches a Google Street View image for the given location and heading,
+    validates it, and uploads it to S3 if valid.
 
     Parameters:
-    - location: tuple of latitude and longitude (lat, lng)
-    - heading: float - the compass direction of the camera, in degrees
-    - pitch: float - the up or down angle of the camera, in degrees
-    - fov: float - the field of view of the camera, in degrees
-    - output_image: str - the path to save the image file
+    - group_name: name of the group (used in folder structure)
+    - location: tuple (lat, lng)
+    - heading: camera direction in degrees
+    - pitch: camera tilt (default 0)
+    - fov: field of view (default from config)
+    - order: image order/index in group
+    - local_name: normalized place name (used as top-level S3 prefix)
+    - bucket_name: S3 bucket to upload image to
+    - verbose: enable debug output
 
     Returns:
-    - None
+    - request_url if image uploaded to S3
+    - False if no valid image found
     """
-    # Prepare the parameters for the API request
+    import requests
+    from PIL import Image
+    from io import BytesIO
+    import boto3
 
-    folder_name = f"output/street-view/group-{group_name}"                           
-    output_image = f"{folder_name}/order-{order}-heading-{heading}.jpg"
+    assert local_name, "local_name is required to construct S3 key"
+
+    # Build Google Street View request
     base_url = "https://maps.googleapis.com/maps/api/streetview"
     params = {
-        "size": "2048x2048",  # Image size
-        "location": f"{location[0]},{location[1]}",  # Address or lat,lng
-        "heading": heading,  # Camera heading direction
-        "pitch": pitch,  # Camera pitch
-        "fov": fov,  # Field of view
-        "key": gcp_api_key,  # API key
+        "size": "2048x2048",
+        "location": f"{location[0]},{location[1]}",
+        "heading": heading,
+        "pitch": pitch,
+        "fov": fov,
+        "key": gcp_api_key,
     }
-
-    # Print URL for manual testing in the browser
     request_url = requests.Request('GET', base_url, params=params).prepare().url
 
-    # Send the request to fetch the Street View image
+    # Fetch image
     response = requests.get(base_url, params=params)
+    if response.status_code != 200 or not response.content:
+        if verbose:
+            print(f"[FAIL] {response.status_code} - No image content")
+        return False
 
-    if response.status_code == 200 and response.content:
-        # Open the image from response content
+    try:
         image = Image.open(BytesIO(response.content))
 
-        # Check for 'Sorry, we have no imagery here' using specific pixels
         if image.getbbox() and is_image_valid(image):
-            with open(output_image, "wb") as file:
-                file.write(response.content)
+            # Upload to S3
+            s3 = boto3.client("s3")
+            s3.upload_fileobj(BytesIO(response.content), bucket_name, s3_key, ExtraArgs={"ContentType": "image/jpeg"})
+
             if verbose:
-                print(f"Street View image saved as {output_image}")
-            if delete:
-                os.system(f"rm {output_image}")
-            return request_url 
+                print(f"[SUCCESS] Uploaded to s3://{bucket_name}/{s3_key}")
+            return request_url
         else:
             if verbose:
-                print("No valid Street View imagery available for this location.")
+                print("[INFO] Image is blank or invalid.")
             return False
-    else:
+
+    except Exception as e:
         if verbose:
-            print(f"Failed to fetch a valid image. HTTP Status Code: {response.status_code}")
-            print(f"Response: {response.text if response.content else 'No content returned'}")
+            print(f"[ERROR] Failed to process image: {e}")
         return False
+
 
 def is_image_valid(image):
     """
@@ -144,13 +165,14 @@ def upload_to_s3(image_content, s3_key):
         ExpiresIn=3600
     )
 
-def automate_street_view_images(df, group_name, bucket_name, region,verbose=False):
+def automate_street_view_images(df, group_name, bucket_name, region, verbose=False):
+    import boto3
+    from io import BytesIO
+
     filtered_df = df[df["group"] == group_name].reset_index(drop=True)
-    folder_name = f"output/street-view/group-{group_name}"
-    create_clean_folder(folder_name)
 
     if verbose:
-        print(f"Output directory created: {folder_name}")
+        print(f"[INFO] Processing group: {group_name} with {len(filtered_df)} rows")
 
     filtered_df["s3_path"] = None
 
@@ -161,52 +183,48 @@ def automate_street_view_images(df, group_name, bucket_name, region,verbose=Fals
 
         if location is not None:
             for heading in [0, 90, 180, 270]:
+                # Fetch image and upload directly to S3 (returns request URL if successful)
+                s3_key = f"{place}/google_street_view/group-{group_name}/order-{order}-heading-{heading}.jpg"
                 request_url = get_street_view_image(
                     group_name=group_name,
                     location=location,
                     heading=heading,
-                    order=order
+                    order=order,
+                    local_name=place,
+                    bucket_name=bucket_name,
+                    s3_key=s3_key,
+                    verbose=verbose
                 )
 
                 if request_url:
-                    try:
-                        # Fetch image from Google Street View
-                        response = requests.get(request_url, headers={"User-Agent": "Mozilla/5.0"})
-                        if response.status_code == 200:
-                            # Upload image to S3
-                            s3_key = f"street_view/{place}/{group_name}/order_{order}_heading_{heading}.jpg"
-                            s3_client = boto3.client("s3")
-                            s3_client.upload_fileobj(BytesIO(response.content), bucket_name, s3_key)
+                    # Save S3 info in DataFrame
+                    filtered_df.at[i, "s3_path"] = s3_key
+                    s3_url = f"https://{bucket_name}.s3.{region}.amazonaws.com/{s3_key}"
+                    filtered_df.at[i, f"request_url_heading_{heading}"] = s3_url
 
-                            # Store S3 path in DataFrame
-                            filtered_df.at[i, "s3_path"] = s3_key
-                            link = f"https://{bucket_name}.s3.{region}.amazonaws.com/{s3_key}"
-                            filtered_df.at[i, f"request_url_heading_{heading}"] = link
+                    # Lambda payload
+                    payload = {
+                        "bucket": bucket_name,
+                        "key": s3_key,
+                        "place": place,
+                        "location": f"({location[0]},{location[1]})",
+                        "heading": heading,
+                        "order": order,
+                        "group": group_name,
+                        "s3_link": s3_url
+                    }
 
+                    if verbose:
+                        print(f"[LAMBDA PAYLOAD] {payload}")
 
-                            # Prepare payload for Lambda (bucket/key, not URL)
-                            my_payload = {
-                                "bucket": bucket_name,
-                                "key": s3_key,
-                                "place": place,
-                                "location": f"({location[0]},{location[1]})",
-                                "heading": heading,
-                                "order": order,
-                                "group": group_name,
-                                "s3_link": link
-                            }
-
-                            if verbose:
-                                print(my_payload)
-
-                            invoke_lambda(
-                                my_payload=my_payload,
-                                lambda_name=config.lambda_1_label_img,
-                                invocation_type="Event"
-                            )
-                        else:
-                            print(f"Failed to download image (HTTP {response.status_code}): {request_url}")
-                    except Exception as e:
-                        print(f"Error processing heading {heading} for order {order}: {e}")
+                    # Invoke Lambda asynchronously
+                    invoke_lambda(
+                        my_payload=payload,
+                        lambda_name=config.lambda_1_label_img,
+                        invocation_type="Event"
+                    )
+                elif verbose:
+                    print(f"[SKIPPED] No valid image for heading {heading} at {location}")
 
     return filtered_df
+
