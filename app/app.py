@@ -176,7 +176,6 @@ if st.button("Generate Map"):
                 logging.error(f"[ERROR] {general_error}")
 
 
-             Future: re-enable processing pipeline
              df = prepare_data(gdf, place)
              df = process_data(df)
              df = process_images_for_groups(df)
