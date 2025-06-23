@@ -176,11 +176,11 @@ if st.button("Generate Map"):
                 logging.error(f"[ERROR] {general_error}")
 
 
-             df = prepare_data(gdf, place)
-             df = process_data(df)
-             df = process_images_for_groups(df)
-             st.dataframe(df)
-             logging.info("Processing complete.")
+            df = prepare_data(gdf, place)
+            df = process_data(df)
+            df = process_images_for_groups(df)
+            st.dataframe(df)
+            logging.info("Processing complete.")
 
         except Exception as e:
             logging.error(f"Error processing place {place}: {e}")
