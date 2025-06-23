@@ -179,6 +179,7 @@ if st.button("Generate Map"):
             df = prepare_data(gdf, place)
             df = process_data(df)
             df = process_images_for_groups(df)
+            df= df[df["place"]==place_name_normalized ]
             st.dataframe(df)
             logging.info("Processing complete.")
 
